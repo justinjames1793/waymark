@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Waymark design tokens.
+ *
+ * Everything derives from the brand kit in ../brand:
+ *   ink   #141A2E  ->  hsl(226 39% 13%)   (mark-ink.svg, lockup-ink.svg)
+ *   paper #FFFFFF
+ *
+ * The accent is a trail-blaze amber — the colour of a painted waymark on a
+ * trail. It is used for emphasis, match scores and focus moments only; it is
+ * never used for body text on light backgrounds, where it fails contrast.
+ */
+
+@layer base {
+  :root {
+    --ink: 226 39% 13%;
+    --ink-soft: 226 24% 28%;
+
+    --background: 0 0% 100%;
+    --foreground: 226 39% 13%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 226 39% 13%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 226 39% 13%;
+
+    --primary: 226 39% 13%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 226 22% 96%;
+    --secondary-foreground: 226 39% 13%;
+
+    --muted: 226 22% 96%;
+    --muted-foreground: 226 12% 46%;
+
+    --accent: 28 92% 52%;
+    --accent-foreground: 226 39% 13%;
+
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 226 18% 90%;
+    --input: 226 18% 88%;
+    --ring: 226 39% 13%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --ink: 0 0% 100%;
+    --ink-soft: 226 16% 72%;
+
+    --background: 226 39% 7%;
+    --foreground: 210 20% 98%;
+
+    --card: 226 32% 11%;
+    --card-foreground: 210 20% 98%;
+
+    --popover: 226 32% 11%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 0 0% 100%;
+    --primary-foreground: 226 39% 13%;
+
+    --secondary: 226 26% 17%;
+    --secondary-foreground: 210 20% 98%;
+
+    --muted: 226 26% 17%;
+    --muted-foreground: 226 14% 65%;
+
+    --accent: 28 92% 56%;
+    --accent-foreground: 226 39% 10%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 226 22% 20%;
+    --input: 226 22% 22%;
+    --ring: 226 16% 72%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Visible focus for keyboard users, invisible for mouse users. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer utilities {
+  /* Subtle grid used behind hero sections. */
+  .bg-grid {
+    background-image: linear-gradient(
+        hsl(var(--foreground) / 0.035) 1px,
+        transparent 1px
+      ),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.035) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
