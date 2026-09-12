@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { Compass, Layers, Sparkles } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 import { WaymarkLockup } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
+
+export const dynamic = "force-dynamic";
 
 const features = [
   {
@@ -21,20 +24,46 @@ const features = [
   },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Offering "Sign in" to someone who already has a session sends them into a
+  // redirect chain that lands somewhere they didn't ask for. If they're signed
+  // in, the only honest CTA is "keep going".
+  const signedIn = Boolean(user);
+
   return (
     <main className="min-h-screen">
       <header className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-5">
         <WaymarkLockup />
         <div className="flex items-center gap-1.5">
-          <Link href="/auth">
-            <Button variant="ghost" size="sm">
-              Sign in
-            </Button>
-          </Link>
-          <Link href="/auth?mode=signup" className="hidden sm:block">
-            <Button size="sm">Get started</Button>
-          </Link>
+          {signedIn ? (
+            <>
+              <form action="/auth/signout" method="post">
+                <Button type="submit" variant="ghost" size="sm">
+                  Sign out
+                </Button>
+              </form>
+              <Link href="/dashboard">
+                <Button size="sm">Continue</Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/auth">
+                <Button variant="ghost" size="sm">
+                  Sign in
+                </Button>
+              </Link>
+              <Link href="/auth?mode=signup" className="hidden sm:block">
+                <Button size="sm">Get started</Button>
+              </Link>
+            </>
+          )}
         </div>
       </header>
 
@@ -61,16 +90,26 @@ export default function LandingPage() {
           </p>
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/auth?mode=signup" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto">
-                Get started
-              </Button>
-            </Link>
-            <Link href="/auth" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                I have an account
-              </Button>
-            </Link>
+            {signedIn ? (
+              <Link href="/dashboard" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto">
+                  Continue where you left off
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/auth?mode=signup" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full sm:w-auto">
+                    Get started
+                  </Button>
+                </Link>
+                <Link href="/auth" className="w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                    I have an account
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>

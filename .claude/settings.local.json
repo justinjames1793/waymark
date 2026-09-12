@@ -6,7 +6,10 @@
       "Read(//Applications/**)",
       "Read(//private/tmp/**)",
       "Bash(curl -s -X POST http://localhost:3000/api/onboarding -H 'Content-Type: application/json' -H 'Cookie: __CMDSUB_OUTPUT__' -d '{\"fullName\":\"Test Student\",\"major\":\"Data Science\",\"year\":\"2nd year\",\"interests\":[\"Data science & AI\",\"Startups & entrepreneurship\"],\"careerGoals\":\"Break into product management at a startup.\"}' -w '\\\\nHTTP_STATUS:%{http_code}\\\\n')",
-      "Bash(curl -s -o /dev/null -w 'onboarding page status: %{http_code}, redirect: %header{location}\\\\n' -D - http://localhost:3000/onboarding -H 'Cookie: __CMDSUB_OUTPUT__')"
+      "Bash(curl -s -o /dev/null -w 'onboarding page status: %{http_code}, redirect: %header{location}\\\\n' -D - http://localhost:3000/onboarding -H 'Cookie: __CMDSUB_OUTPUT__')",
+      "Bash(curl -s -o /dev/null -D - http://localhost:3001/dashboard -H 'Cookie: __CMDSUB_OUTPUT__')",
+      "Bash(curl -s -X POST http://localhost:3001/api/onboarding -H 'Content-Type: application/json' -H 'Cookie: __CMDSUB_OUTPUT__' -d '{\"fullName\":\"Justin Test\",\"major\":\"Data Science\",\"year\":\"3rd year\",\"interests\":[\"Data science & AI\",\"Startups & entrepreneurship\",\"Research\"],\"careerGoals\":\"Launch a startup and learn how research commercialization works.\"}' -w '\\\\nHTTP:%{http_code}\\\\n')",
+      "Bash(curl -s http://localhost:3002/ -H 'Cookie: __CMDSUB_OUTPUT__')"
     ]
   }
 }
