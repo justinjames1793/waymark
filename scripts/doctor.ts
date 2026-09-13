@@ -191,6 +191,26 @@ async function checkDatabase() {
     }
   }
 
+  // The reflection loop and the resume field were added after the first schema
+  // run. Selecting them is the cheapest way to prove the migration landed —
+  // without it the app fails at runtime on a column that simply isn't there.
+  const { error: colErr } = await admin
+    .from("saved_opportunities")
+    .select("attended, rating, reflection, reflected_at")
+    .limit(1);
+  const { error: resumeErr } = await admin.from("profiles").select("resume").limit(1);
+
+  if (colErr || resumeErr) {
+    report(
+      "fail",
+      "Saved/reflection columns exist",
+      (colErr ?? resumeErr)?.message,
+      "Re-run supabase/schema.sql — it adds profiles.resume and the attended/rating/reflection columns."
+    );
+  } else {
+    report("pass", "Saved/reflection columns exist");
+  }
+
   const { error: fnErr } = await admin.rpc("match_opportunities", {
     query_embedding: new Array(384).fill(0),
     match_count: 1,

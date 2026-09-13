@@ -19,7 +19,14 @@
       "Bash(grep -A 15 \"Groq explanation failed\" /tmp/wm3.log | head -30)",
       "Bash(curl -s -X POST http://localhost:3002/api/explain -H 'Content-Type: application/json' -H 'Cookie: __TRACKED_VAR__' -d @/tmp/wm-ids.json)",
       "Bash(python3 -c ' *)",
-      "Bash(python3 -c \"import json,sys; print\\(len\\(json.load\\(sys.stdin\\).get\\('explanations',{}\\)\\), 'explanations still returned'\\)\")"
+      "Bash(python3 -c \"import json,sys; print\\(len\\(json.load\\(sys.stdin\\).get\\('explanations',{}\\)\\), 'explanations still returned'\\)\")",
+      "Bash(curl -s -X POST http://localhost:3002/api/reflect -H 'Content-Type: application/json' -H 'Cookie: __CMDSUB_OUTPUT__' -d '{\"opportunityId\":\"__TRACKED_VAR__\",\"attended\":true,\"rating\":3,\"reflection\":\"Soldered my first board and met the embedded systems lead. Want more hardware and robotics work.\"}' -w ' [HTTP %{http_code}]\\\\n')",
+      "Bash(curl -s http://localhost:3002/profile -H 'Cookie: __CMDSUB_OUTPUT__' -o /tmp/wm-p2.html)",
+      "Read(//tmp/**)",
+      "Bash(curl -s -X POST http://localhost:3002/api/reflect -H 'Content-Type: application/json' -H 'Cookie: __CMDSUB_OUTPUT__' -d '{\"opportunityId\":\"__TRACKED_VAR__\",\"attended\":false}' -w ' [HTTP %{http_code}]\\\\n')",
+      "Bash(curl -s -X POST http://localhost:3002/api/reflect -H 'Content-Type: application/json' -H 'Cookie: __CMDSUB_OUTPUT__' -d '{\"opportunityId\":\"__TRACKED_VAR__\",\"attended\":true}' -w ' [HTTP %{http_code}]\\\\n')",
+      "Bash(curl -s -X POST http://localhost:3002/api/saved -H 'Content-Type: application/json' -H 'Cookie: __CMDSUB_OUTPUT__' -d '{\"opportunityId\":\"__TRACKED_VAR__\",\"saved\":false}' -w ' [HTTP %{http_code}]\\\\n')",
+      "Bash(curl -s http://localhost:3002/saved -H 'Cookie: __CMDSUB_OUTPUT__')"
     ]
   }
 }

@@ -1,5 +1,8 @@
+"use client";
+
 import { CalendarDays, MapPin, ExternalLink, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { SaveButton } from "@/components/save-button";
 import { cn, formatEventTime, formatMatch } from "@/lib/utils";
 import { categoryLabel, orgTypeLabel } from "@/lib/constants";
 import type { Opportunity } from "@/types/database";
@@ -9,9 +12,17 @@ interface Props {
   /** The Groq "why this matched" line. Absent whenever Groq is unavailable. */
   explanation?: string;
   showMatch?: boolean;
+  saved?: boolean;
+  onSavedChange?: (id: string, saved: boolean) => void;
 }
 
-export function OpportunityCard({ opportunity: o, explanation, showMatch }: Props) {
+export function OpportunityCard({
+  opportunity: o,
+  explanation,
+  showMatch,
+  saved = false,
+  onSavedChange,
+}: Props) {
   return (
     <article className="rounded-xl border border-border p-5 transition-colors hover:border-foreground/20">
       <div className="flex items-start justify-between gap-4">
@@ -41,16 +52,18 @@ export function OpportunityCard({ opportunity: o, explanation, showMatch }: Prop
           <p className="mt-0.5 text-sm text-muted-foreground">{o.organization}</p>
         </div>
 
-        {showMatch && typeof o.similarity === "number" && (
-          <span
-            className={cn(
-              "shrink-0 rounded-full bg-accent/15 px-2.5 py-1 text-xs font-semibold",
-              "text-accent-foreground"
-            )}
-          >
-            {formatMatch(o.similarity)}
-          </span>
-        )}
+        <div className="flex shrink-0 items-center gap-1.5">
+          {showMatch && typeof o.similarity === "number" && (
+            <span className="rounded-full bg-accent/15 px-2.5 py-1 text-xs font-semibold text-accent-foreground">
+              {formatMatch(o.similarity)}
+            </span>
+          )}
+          <SaveButton
+            opportunityId={o.id}
+            initialSaved={saved}
+            onChange={(next) => onSavedChange?.(o.id, next)}
+          />
+        </div>
       </div>
 
       {o.description && (

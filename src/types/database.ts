@@ -6,9 +6,26 @@ export interface Profile {
   year: string | null;
   interests: string[] | null;
   career_goals: string | null;
+  resume: string | null;
   onboarding_complete: boolean;
   created_at: string;
   updated_at: string;
+}
+
+/** A saved (favourited) opportunity, plus the reflection once the event passes. */
+export interface SavedOpportunity {
+  user_id: string;
+  opportunity_id: string;
+  created_at: string;
+  attended: boolean | null;
+  rating: number | null;
+  reflection: string | null;
+  reflected_at: string | null;
+}
+
+/** A saved row joined to the opportunity it points at. */
+export interface SavedWithOpportunity extends SavedOpportunity {
+  opportunities: Opportunity;
 }
 
 export interface Opportunity {

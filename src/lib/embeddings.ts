@@ -84,17 +84,53 @@ export async function embedMany(texts: string[]): Promise<number[][]> {
   });
 }
 
-/** The text actually fed to the model — what a profile "means" for matching purposes. */
-export function buildProfileEmbeddingText(input: {
+export interface ProfileEmbeddingInput {
   major: string;
   year: string;
   interests: string[];
   careerGoals: string;
-}): string {
-  return [
+  resume?: string | null;
+  /** Events the student attended, so the feed learns from what they did. */
+  experiences?: {
+    title: string;
+    organization: string;
+    rating: number | null;
+    reflection: string | null;
+  }[];
+}
+
+// all-MiniLM-L6-v2 truncates at 256 word pieces and says nothing about it, so
+// order here is load-bearing: the stated goals go first and the free-text
+// resume last, because that is the part we can most afford to lose.
+const RESUME_BUDGET = 600;
+const MAX_EXPERIENCES = 5;
+
+/** The text actually fed to the model — what a profile "means" for matching purposes. */
+export function buildProfileEmbeddingText(input: ProfileEmbeddingInput): string {
+  const parts = [
     `Major: ${input.major}`,
     `Year: ${input.year}`,
     `Interests: ${input.interests.join(", ")}`,
     `Career goals: ${input.careerGoals}`,
-  ].join("\n");
+  ];
+
+  // Only experiences the student got something out of. A vector has no way to
+  // express "less like this", so folding in a badly-rated event would pull the
+  // feed toward more of exactly what they disliked.
+  const valued = (input.experiences ?? [])
+    .filter((e) => (e.rating ?? 0) >= 2)
+    .slice(0, MAX_EXPERIENCES);
+
+  if (valued.length) {
+    const lines = valued.map((e) => {
+      const took = e.reflection?.trim();
+      return `- ${e.title} (${e.organization})${took ? `: ${took}` : ""}`;
+    });
+    parts.push(`Has attended and valued:\n${lines.join("\n")}`);
+  }
+
+  const resume = input.resume?.trim();
+  if (resume) parts.push(`Background: ${resume.slice(0, RESUME_BUDGET)}`);
+
+  return parts.join("\n");
 }

@@ -17,6 +17,7 @@ export interface InitialProfile {
   year: string | null;
   interests: string[] | null;
   career_goals: string | null;
+  resume?: string | null;
 }
 
 /**
@@ -38,6 +39,7 @@ export function ProfileForm({
   const [year, setYear] = useState(initial?.year ?? "");
   const [interests, setInterests] = useState<string[]>(initial?.interests ?? []);
   const [careerGoals, setCareerGoals] = useState(initial?.career_goals ?? "");
+  const [resume, setResume] = useState(initial?.resume ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -61,7 +63,7 @@ export function ProfileForm({
       const res = await fetch("/api/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName, major, year, interests, careerGoals }),
+        body: JSON.stringify({ fullName, major, year, interests, careerGoals, resume }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error ?? "Something went wrong.");
@@ -163,6 +165,23 @@ export function ProfileForm({
           value={careerGoals}
           onChange={(e) => setCareerGoals(e.target.value)}
           placeholder="What are you hoping to figure out or move toward? Be specific — 'break into product management' matches differently than 'not sure yet, exploring tech.'"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="resume">
+          Resume <span className="font-normal text-muted-foreground">(optional)</span>
+        </Label>
+        <p className="-mt-1 mb-1.5 text-xs text-muted-foreground">
+          Paste it as text — experience, projects, skills. It sharpens matching,
+          and it grows as you log events you attend.
+        </p>
+        <Textarea
+          id="resume"
+          value={resume}
+          onChange={(e) => setResume(e.target.value)}
+          placeholder="Experience, projects, coursework, skills…"
+          className="min-h-[140px]"
         />
       </div>
 

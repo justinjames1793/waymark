@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { embed, buildProfileEmbeddingText } from "@/lib/embeddings";
+import { refreshProfileEmbedding } from "@/lib/profile-embedding";
 import { YEARS, INTERESTS } from "@/lib/constants";
+
+const RESUME_MAX = 5000;
 
 export async function POST(request: Request) {
   const supabase = createClient();
@@ -22,6 +24,7 @@ export async function POST(request: Request) {
     ? body.interests.filter((i: unknown) => typeof i === "string" && INTERESTS.includes(i as (typeof INTERESTS)[number]))
     : [];
   const careerGoals = typeof body.careerGoals === "string" ? body.careerGoals.trim() : "";
+  const resume = typeof body.resume === "string" ? body.resume.trim().slice(0, RESUME_MAX) : "";
 
   if (
     !fullName ||
@@ -33,35 +36,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Fill in every field, and pick at least one interest." }, { status: 400 });
   }
 
-  const update: Record<string, unknown> = {
-    full_name: fullName,
-    major,
-    year,
-    interests,
-    career_goals: careerGoals,
-    onboarding_complete: true,
-    updated_at: new Date().toISOString(),
-  };
-
-  // If Hugging Face is down, the profile still saves — the student isn't stuck
-  // on this page — it just falls back to the plain list until the next edit
-  // recomputes the vector. Failing to write here would look identical to a
-  // wrong password, the exact class of bug this app was rebuilt to avoid.
-  let matchingReady = true;
-  try {
-    update.embedding = await embed(
-      buildProfileEmbeddingText({ major, year, interests, careerGoals })
-    );
-  } catch (err) {
-    console.error("Onboarding embedding failed:", err);
-    matchingReady = false;
-  }
-
-  const { error } = await supabase.from("profiles").update(update).eq("id", user.id);
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      full_name: fullName,
+      major,
+      year,
+      interests,
+      career_goals: careerGoals,
+      resume: resume || null,
+      onboarding_complete: true,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  // Saved first, embedded second. If Hugging Face is down the student still
+  // keeps their answers and simply gets a date-ordered feed until the next
+  // edit recomputes the vector — losing the answers would be the worse failure.
+  const matchingReady = await refreshProfileEmbedding(supabase, user.id);
 
   return NextResponse.json({ ok: true, matchingReady });
 }

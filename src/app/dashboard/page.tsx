@@ -1,7 +1,10 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { fetchSaved, splitSaved } from "@/lib/saved";
 import { AppNav } from "@/components/app-nav";
 import { Feed } from "@/components/feed";
+import { ReflectionPrompt } from "@/components/reflection-prompt";
 import type { MatchedOpportunity } from "@/types/database";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +43,9 @@ export default async function DashboardPage() {
   const opportunities = (matched ?? []) as MatchedOpportunity[];
   const firstName = profile.full_name?.trim().split(/\s+/)[0] ?? "there";
 
+  const saved = await fetchSaved(supabase, user.id);
+  const { pending } = splitSaved(saved);
+
   return (
     <main className="min-h-screen">
       <AppNav />
@@ -56,11 +62,27 @@ export default async function DashboardPage() {
           to look outside them.
         </p>
 
+        {pending.length > 0 && (
+          <section className="mt-8">
+            <ReflectionPrompt opportunity={pending[0].opportunities} />
+            {pending.length > 1 && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {pending.length - 1} more to review in{" "}
+                <Link href="/saved" className="underline underline-offset-4">
+                  Saved
+                </Link>
+                .
+              </p>
+            )}
+          </section>
+        )}
+
         <div className="mt-8">
           <Feed
             opportunities={opportunities}
             showMatch
             explain
+            savedIds={saved.map((row) => row.opportunity_id)}
             emptyMessage="Nothing is loaded into the catalog yet. Run npm run seed to populate it."
           />
         </div>

@@ -34,6 +34,12 @@ create table if not exists public.profiles (
   updated_at          timestamptz not null default now()
 );
 
+-- Optional free-text resume / background. Plain text rather than an uploaded
+-- file on purpose: it feeds the embedding directly, and a storage bucket would
+-- mean another RLS surface and a parser for one field.
+alter table public.profiles
+  add column if not exists resume text;
+
 alter table public.profiles enable row level security;
 
 drop policy if exists "profiles: read own" on public.profiles;
@@ -125,6 +131,26 @@ create table if not exists public.saved_opportunities (
   created_at     timestamptz not null default now(),
   primary key (user_id, opportunity_id)
 );
+
+-- The reflection loop. A saved opportunity whose start time has passed and whose
+-- `attended` is still null is what the app prompts about; answering writes these
+-- columns and recomputes the profile embedding, so what a student actually went
+-- to and valued feeds back into their ranking.
+--
+-- attended null  = not asked yet (or asked and skipped)
+-- attended false = said no, stop asking
+-- rating 1..3    = not useful / somewhat / very
+alter table public.saved_opportunities
+  add column if not exists attended    boolean,
+  add column if not exists rating      int,
+  add column if not exists reflection  text,
+  add column if not exists reflected_at timestamptz;
+
+alter table public.saved_opportunities
+  drop constraint if exists saved_opportunities_rating_check;
+alter table public.saved_opportunities
+  add constraint saved_opportunities_rating_check
+  check (rating is null or rating between 1 and 3);
 
 alter table public.saved_opportunities enable row level security;
 

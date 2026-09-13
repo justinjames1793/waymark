@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { fetchSaved } from "@/lib/saved";
 import { AppNav } from "@/components/app-nav";
 import { Feed } from "@/components/feed";
 import type { Opportunity } from "@/types/database";
@@ -27,6 +28,7 @@ export default async function ExplorePage() {
     .order("starts_at", { ascending: true, nullsFirst: false });
 
   const opportunities = (data ?? []) as Opportunity[];
+  const saved = await fetchSaved(supabase, user.id);
 
   return (
     <main className="min-h-screen">
@@ -42,6 +44,7 @@ export default async function ExplorePage() {
         <div className="mt-8">
           <Feed
             opportunities={opportunities}
+            savedIds={saved.map((row) => row.opportunity_id)}
             emptyMessage="Nothing is loaded into the catalog yet. Run npm run seed to populate it."
           />
         </div>

@@ -16,16 +16,28 @@ interface Props {
   showMatch?: boolean;
   /** Ask Groq for "why this matched" lines on the top few cards. */
   explain?: boolean;
+  /** Opportunity ids the student has already favourited. */
+  savedIds?: string[];
   emptyMessage: string;
 }
 
 const EXPLAIN_COUNT = 5;
 
-export function Feed({ opportunities, showMatch, explain, emptyMessage }: Props) {
+export function Feed({ opportunities, showMatch, explain, savedIds, emptyMessage }: Props) {
   const [orgType, setOrgType] = useState<string>("all");
   const [categories, setCategories] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [explanations, setExplanations] = useState<Record<string, string>>({});
+  const [saved, setSaved] = useState<Set<string>>(() => new Set(savedIds ?? []));
+
+  function handleSavedChange(id: string, isSaved: boolean) {
+    setSaved((prev) => {
+      const next = new Set(prev);
+      if (isSaved) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
 
   const topIds = useMemo(
     () => opportunities.slice(0, EXPLAIN_COUNT).map((o) => o.id),
@@ -167,6 +179,8 @@ export function Feed({ opportunities, showMatch, explain, emptyMessage }: Props)
               opportunity={o}
               explanation={explanations[o.id]}
               showMatch={showMatch}
+              saved={saved.has(o.id)}
+              onSavedChange={handleSavedChange}
             />
           ))}
         </div>
