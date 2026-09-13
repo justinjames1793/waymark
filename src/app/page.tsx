@@ -3,6 +3,7 @@ import { Compass, Layers, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { WaymarkLockup } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
+import { Reveal } from "@/components/reveal";
 
 export const dynamic = "force-dynamic";
 
@@ -72,52 +73,61 @@ export default async function LandingPage() {
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent"
         />
-        <div className="mx-auto max-w-3xl px-5 pb-24 pt-24 text-center sm:pt-28">
-          <p className="mb-5 inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
-            Starting at UC San Diego
-          </p>
+        <div className="mx-auto max-w-3xl px-5 pb-20 pt-20 text-center sm:pt-28">
+          <Reveal>
+            <p className="mb-5 inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
+              Starting at UC San Diego
+            </p>
+          </Reveal>
 
-          <h1 className="text-[2.6rem] font-bold leading-[1.08] tracking-tight sm:text-6xl">
-            Find your next step
-            <br />
-            on campus.
-          </h1>
+          <Reveal delay={0.06}>
+            <h1 className="text-[2.6rem] font-bold leading-[1.08] tracking-tight sm:text-6xl">
+              Find your next step
+              <br />
+              on campus.
+            </h1>
+          </Reveal>
 
-          <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            The opportunities that grow your career are already happening around
-            you, scattered across hundreds of clubs, departments and centers.
-            Waymark brings them into one feed, ranked against your goals.
-          </p>
+          <Reveal delay={0.12}>
+            <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+              The opportunities that grow your career are already happening around
+              you, scattered across hundreds of clubs, departments and centers.
+              Waymark brings them into one feed, ranked against your goals.
+            </p>
+          </Reveal>
 
-          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            {signedIn ? (
-              <Link href="/dashboard" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto">
-                  Continue where you left off
-                </Button>
-              </Link>
-            ) : (
-              <>
-                <Link href="/auth?mode=signup" className="w-full sm:w-auto">
+          <Reveal delay={0.18}>
+            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              {signedIn ? (
+                <Link href="/dashboard" className="w-full sm:w-auto">
                   <Button size="lg" className="w-full sm:w-auto">
-                    Get started
+                    Continue where you left off
                   </Button>
                 </Link>
-                <Link href="/auth" className="w-full sm:w-auto">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                    I have an account
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
+              ) : (
+                <>
+                  <Link href="/auth?mode=signup" className="w-full sm:w-auto">
+                    <Button size="lg" className="w-full sm:w-auto">
+                      Get started
+                    </Button>
+                  </Link>
+                  <Link href="/auth" className="w-full sm:w-auto">
+                    <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                      I have an account
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
+          </Reveal>
         </div>
+
       </section>
 
       <section className="mx-auto max-w-6xl px-5 py-20">
         <div className="grid gap-10 sm:grid-cols-3 sm:gap-8">
-          {features.map((feature) => (
-            <div key={feature.title}>
+          {features.map((feature, i) => (
+            <Reveal key={feature.title} inView delay={i * 0.08}>
               <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
                 <feature.icon className="h-[18px] w-[18px]" />
               </div>
@@ -125,9 +135,29 @@ export default async function LandingPage() {
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {feature.body}
               </p>
-            </div>
+            </Reveal>
           ))}
         </div>
+      </section>
+
+      <section className="border-t border-border bg-secondary/40">
+        <Reveal inView className="mx-auto max-w-3xl px-5 py-20 text-center">
+          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            It gets sharper the more you use it.
+          </h2>
+          <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
+            Save what looks good. After it happens, tell Waymark how it went. What
+            you actually showed up to — and got something out of — starts shaping
+            what it puts in front of you next.
+          </p>
+          {!signedIn && (
+            <div className="mt-8">
+              <Link href="/auth?mode=signup">
+                <Button size="lg">Get started</Button>
+              </Link>
+            </div>
+          )}
+        </Reveal>
       </section>
 
       <footer className="border-t border-border">

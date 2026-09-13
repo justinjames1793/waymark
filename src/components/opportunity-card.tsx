@@ -25,7 +25,7 @@ export function OpportunityCard({
 }: Props) {
   return (
     <article className="rounded-xl border border-border p-5 transition-colors hover:border-foreground/20">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-3 sm:gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge variant="secondary">{orgTypeLabel(o.org_type)}</Badge>

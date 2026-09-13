@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { YEARS, INTERESTS } from "@/lib/constants";
+import { YEARS, INTERESTS, suggestedInterests } from "@/lib/constants";
 
 export interface InitialProfile {
   full_name: string | null;
@@ -42,6 +42,16 @@ export function ProfileForm({
   const [resume, setResume] = useState(initial?.resume ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const suggested = useMemo(() => suggestedInterests(major), [major]);
+
+  // Suggested first, everything else still there and still in order. Nothing is
+  // auto-selected: the profile should only ever contain answers the student
+  // actually gave.
+  const orderedInterests = useMemo(() => {
+    if (!suggested.length) return [...INTERESTS] as string[];
+    return [...suggested, ...INTERESTS.filter((i) => !suggested.includes(i))];
+  }, [suggested]);
 
   function toggleInterest(interest: string) {
     setInterests((prev) =>
@@ -132,11 +142,14 @@ export function ProfileForm({
       <div>
         <Label>Interests</Label>
         <p className="-mt-1 mb-1.5 text-xs text-muted-foreground">
-          Pick as many as apply — this drives the feed more than anything else.
+          {suggested.length
+            ? "Common for your major are shown first — but the best opportunities are usually outside it, so pick widely."
+            : "Pick as many as apply — this drives the feed more than anything else."}
         </p>
         <div className="flex flex-wrap gap-2">
-          {INTERESTS.map((interest) => {
+          {orderedInterests.map((interest) => {
             const selected = interests.includes(interest);
+            const isSuggested = suggested.includes(interest);
             return (
               <button
                 key={interest}
@@ -147,7 +160,9 @@ export function ProfileForm({
                   "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
                   selected
                     ? "border-transparent bg-accent/15 text-accent-foreground"
-                    : "border-input bg-background hover:bg-secondary"
+                    : isSuggested
+                      ? "border-accent/45 bg-background hover:bg-secondary"
+                      : "border-input bg-background hover:bg-secondary"
                 )}
               >
                 {interest}

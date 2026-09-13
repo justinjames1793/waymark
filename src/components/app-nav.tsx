@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { WaymarkLockup } from "@/components/brand/logo";
+import { WaymarkLockup, WaymarkMark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -20,8 +20,11 @@ export function AppNav() {
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-[60px] max-w-5xl items-center gap-4 px-5">
-        <Link href="/dashboard" className="shrink-0">
-          <WaymarkLockup />
+        {/* Wordmark costs ~85px that five tabs need on a phone. The mark alone
+            still reads as the logo and still goes home. */}
+        <Link href="/dashboard" className="shrink-0" aria-label="Waymark home">
+          <WaymarkMark className="h-[26px] w-[26px] sm:hidden" />
+          <WaymarkLockup className="hidden sm:inline-flex" />
         </Link>
 
         {/* Five tabs do not fit a phone. Scroll them rather than wrapping the

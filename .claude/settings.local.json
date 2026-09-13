@@ -26,7 +26,9 @@
       "Bash(curl -s -X POST http://localhost:3002/api/reflect -H 'Content-Type: application/json' -H 'Cookie: __CMDSUB_OUTPUT__' -d '{\"opportunityId\":\"__TRACKED_VAR__\",\"attended\":false}' -w ' [HTTP %{http_code}]\\\\n')",
       "Bash(curl -s -X POST http://localhost:3002/api/reflect -H 'Content-Type: application/json' -H 'Cookie: __CMDSUB_OUTPUT__' -d '{\"opportunityId\":\"__TRACKED_VAR__\",\"attended\":true}' -w ' [HTTP %{http_code}]\\\\n')",
       "Bash(curl -s -X POST http://localhost:3002/api/saved -H 'Content-Type: application/json' -H 'Cookie: __CMDSUB_OUTPUT__' -d '{\"opportunityId\":\"__TRACKED_VAR__\",\"saved\":false}' -w ' [HTTP %{http_code}]\\\\n')",
-      "Bash(curl -s http://localhost:3002/saved -H 'Cookie: __CMDSUB_OUTPUT__')"
+      "Bash(curl -s http://localhost:3002/saved -H 'Cookie: __CMDSUB_OUTPUT__')",
+      "Bash(npx tsx -e ' *)",
+      "Bash(curl -s http://localhost:3002/profile -H 'Cookie: __CMDSUB_OUTPUT__' -o /tmp/wm-pf.html)"
     ]
   }
 }
