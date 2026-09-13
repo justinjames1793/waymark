@@ -38,13 +38,17 @@ export function formatEventTime(
 }
 
 /**
- * pgvector cosine similarity comes back roughly in 0..1, but the useful range
- * for sentence embeddings is compressed near the top. Presenting the raw value
- * makes everything look like a 70% match, so we stretch the 0.3–0.9 band across
- * 0–100 and clamp. This is presentation only — ranking always uses the raw score.
+ * pgvector cosine similarity comes back in a narrow band, not across 0–1, so
+ * the raw number is useless to show: against the seeded catalog a student's
+ * best match scores ~0.48 and the median ~0.28. Stretching 0.20–0.50 across
+ * 0–100 makes a strong match read as one.
+ *
+ * Presentation only — ranking always uses the raw score. If the catalog or the
+ * profile prompt changes shape, re-check the real distribution before trusting
+ * these bounds.
  */
 export function formatMatch(similarity: number): string {
-  const stretched = (similarity - 0.3) / 0.6;
+  const stretched = (similarity - 0.2) / 0.3;
   const pct = Math.round(Math.min(Math.max(stretched, 0), 1) * 100);
   return `${pct}% match`;
 }

@@ -139,6 +139,11 @@ create policy "saved: manage own"
 -- ---------------------------------------------------------------------------
 
 -- Generic vector search. Note it never returns the embedding column.
+--
+-- The `set hnsw.ef_search` below is load-bearing. An HNSW index scan returns at
+-- most ef_search candidate rows, and the default is 40 — so without this the
+-- function silently returns 40 rows no matter how large match_count is, and the
+-- feed quietly stops growing as the catalog does. Nothing errors; it just ends.
 create or replace function public.match_opportunities(
   query_embedding vector(384),
   match_count int default 12
@@ -160,6 +165,7 @@ returns table (
 )
 language sql
 stable
+set hnsw.ef_search = 400
 as $$
   select
     o.id, o.title, o.organization, o.org_type, o.category, o.description,

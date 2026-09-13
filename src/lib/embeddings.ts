@@ -48,6 +48,42 @@ export async function embed(text: string): Promise<number[]> {
   return vector;
 }
 
+/**
+ * Batch version, for the seed/ingest script. The endpoint returns one vector
+ * per input, so a whole quarter of events costs a handful of requests instead
+ * of one per row.
+ */
+export async function embedMany(texts: string[]): Promise<number[][]> {
+  const token = process.env.HUGGINGFACE_API_TOKEN || process.env.HUGGINGFACE_API_KEY;
+  if (!token) throw new Error("HUGGINGFACE_API_TOKEN is not set");
+
+  const res = await fetch(HF_ENDPOINT, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ inputs: texts, options: { wait_for_model: true } }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Hugging Face embedding request failed: ${res.status} ${await res.text()}`);
+  }
+
+  const data: unknown = await res.json();
+
+  if (!Array.isArray(data) || data.length !== texts.length) {
+    throw new Error("Unexpected batch embedding shape from Hugging Face");
+  }
+
+  return data.map((vector) => {
+    if (!Array.isArray(vector) || vector.length !== 384) {
+      throw new Error("Unexpected embedding shape from Hugging Face");
+    }
+    return vector as number[];
+  });
+}
+
 /** The text actually fed to the model — what a profile "means" for matching purposes. */
 export function buildProfileEmbeddingText(input: {
   major: string;

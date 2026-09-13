@@ -11,6 +11,7 @@
 
 import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
+import { GROQ_MODEL } from "../src/lib/constants";
 
 config({ path: ".env.local" });
 
@@ -242,6 +243,25 @@ async function checkServices() {
       });
       if (res.ok) {
         report("pass", "Groq key valid");
+
+        // A valid key with a retired model 404s as model_not_found, which reads
+        // exactly like an auth failure. Check the model we actually call.
+        const body = (await res.json()) as { data?: { id: string }[] };
+        const available = (body.data ?? []).map((m) => m.id);
+        if (available.includes(GROQ_MODEL)) {
+          report("pass", "Groq model available", GROQ_MODEL);
+        } else {
+          const chat = available
+            .filter((id) => !/whisper|guard|orpheus/.test(id))
+            .slice(0, 4)
+            .join(", ");
+          report(
+            "warn",
+            "Groq model available",
+            `${GROQ_MODEL} not in this account's catalogue`,
+            `Match explanations will be skipped. Update GROQ_MODEL in src/lib/constants.ts — currently offered: ${chat}`
+          );
+        }
       } else if (res.status === 401) {
         report("fail", "Groq key valid", "401 unauthorized", "Key is wrong, revoked, or expired. Groq keys you set to expire do exactly this, silently.");
       } else {

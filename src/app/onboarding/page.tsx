@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import OnboardingForm from "./onboarding-form";
+import { WaymarkLockup } from "@/components/brand/logo";
+import { ProfileForm } from "@/components/profile-form";
 
 export const dynamic = "force-dynamic";
 
@@ -23,5 +24,21 @@ export default async function OnboardingPage() {
   // Already done this — send them to the feed instead of making them redo it.
   if (profile?.onboarding_complete) redirect("/dashboard");
 
-  return <OnboardingForm initial={profile ?? null} />;
+  return (
+    <main className="min-h-screen px-5 py-12">
+      <div className="mx-auto max-w-xl">
+        <WaymarkLockup />
+
+        <h1 className="mt-8 text-2xl font-bold tracking-tight">Tell us about you.</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          This is what the recommendation engine matches against — the more
+          specific, the better the feed.
+        </p>
+
+        <div className="mt-8">
+          <ProfileForm initial={profile ?? null} mode="onboarding" />
+        </div>
+      </div>
+    </main>
+  );
 }

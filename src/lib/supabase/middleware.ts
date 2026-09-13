@@ -15,7 +15,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * what performs the refresh.
  */
 
-const PROTECTED = ["/dashboard", "/onboarding", "/opportunities"];
+const PROTECTED = ["/dashboard", "/onboarding", "/explore", "/profile"];
 
 /**
  * Pages a signed-in student has no reason to see. Matched EXACTLY, not by

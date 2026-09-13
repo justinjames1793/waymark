@@ -35,8 +35,14 @@ to incoming students, and pitching a technical friend (Ben) as CTO.
 - **Next.js 14.2.35, App Router, TypeScript.** One app, no separate backend.
 - **Tailwind 3.4** + shadcn-style primitives in `src/components/ui`
 - **Supabase** — Postgres, Auth, RLS, pgvector — via `@supabase/ssr`
-- **Embeddings:** Hugging Face `all-MiniLM-L6-v2`, 384-dim
-- **LLM:** Groq `llama-3.3-70b-versatile`, free tier, explanations only
+- **Embeddings:** Hugging Face `all-MiniLM-L6-v2`, 384-dim, via
+  `router.huggingface.co` — the old `api-inference.huggingface.co` host no
+  longer resolves at all
+- **LLM:** Groq, free tier, explanations only. The model is `GROQ_MODEL` in
+  `src/lib/constants.ts`; doctor checks that exact string against the account's
+  catalogue, because a retired model 404s in a way that reads as a bad key.
+  Groq has dropped every Llama model from this account — `llama-3.3-70b-versatile`
+  is gone
 - **Hosting:** Vercel + Supabase free tier
 
 Versions in `package.json` are pinned exactly, not with carets. They're a set
@@ -134,7 +140,7 @@ npm run doctor      # preflight: env, DB, RLS, keys. Run before anything else.
 npm run dev
 npm run typecheck
 npm run lint
-npm run seed        # not written yet — Phase 3
+npm run seed        # replaces the catalogue; recomputes every embedding
 ```
 
 There's also `GET /api/health` for checking what the running server sees.
@@ -173,11 +179,27 @@ There's also `GET /api/health` for checking what the running server sees.
 
 If step 3 fails, the middleware is the cause. Nothing else.
 
-**Next — Phase 2:** `/onboarding` (name, major, year, interest pills, free-text
-career goals), writing the profile and its embedding.
+**Done — Phase 2:** `/onboarding` (name, major, year, interest pills, free-text
+career goals) writing the profile and its embedding, via `POST /api/onboarding`.
+`/dashboard` redirects there when `onboarding_complete` is false — that redirect
+is the only thing routing an existing account into onboarding, since the auth
+form only sends new signups.
 
-**Phase 3:** seed script, embed step, `/dashboard` matched feed with % match
-badges, Groq explanations, `/opportunities` browse.
+**Done — Phase 3:** `npm run seed` (56 opportunities + embeddings, 16 per HF
+request), `/dashboard` ranked feed via `match_for_me()` with % match badges,
+`/explore` full catalogue by date, `/profile` editing that recomputes the
+embedding, org-type tabs, category filters and search, Groq explanations via
+`POST /api/explain` fetched after paint.
+
+Two things found while building it, both the silent kind:
+
+- **`match_opportunities()` returned 40 rows no matter what `match_count` said.**
+  That is pgvector's HNSW `ef_search` default, not a bug in the query. Fixed with
+  `set hnsw.ef_search` on the function — **re-run `supabase/schema.sql`** to pick
+  it up, or the feed silently stops growing as the catalogue does.
+- **`formatMatch()` was calibrated before there was data** and rendered the best
+  match as "29%". Rebased on the observed 0.20–0.50 band; re-check it if the
+  catalogue or profile prompt changes shape.
 
 **Phase 4:** landing page polish, motion, mobile, empty/loading/error states.
 

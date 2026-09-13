@@ -9,7 +9,17 @@
       "Bash(curl -s -o /dev/null -w 'onboarding page status: %{http_code}, redirect: %header{location}\\\\n' -D - http://localhost:3000/onboarding -H 'Cookie: __CMDSUB_OUTPUT__')",
       "Bash(curl -s -o /dev/null -D - http://localhost:3001/dashboard -H 'Cookie: __CMDSUB_OUTPUT__')",
       "Bash(curl -s -X POST http://localhost:3001/api/onboarding -H 'Content-Type: application/json' -H 'Cookie: __CMDSUB_OUTPUT__' -d '{\"fullName\":\"Justin Test\",\"major\":\"Data Science\",\"year\":\"3rd year\",\"interests\":[\"Data science & AI\",\"Startups & entrepreneurship\",\"Research\"],\"careerGoals\":\"Launch a startup and learn how research commercialization works.\"}' -w '\\\\nHTTP:%{http_code}\\\\n')",
-      "Bash(curl -s http://localhost:3002/ -H 'Cookie: __CMDSUB_OUTPUT__')"
+      "Bash(curl -s http://localhost:3002/ -H 'Cookie: __CMDSUB_OUTPUT__')",
+      "WebSearch",
+      "WebFetch(domain:jacobsschool.ucsd.edu)",
+      "WebFetch(domain:calendar.ucsd.edu)",
+      "Bash(echo \"=== DASHBOARD: ranked feed ===\" && grep -o \"Picked for you, Justin\\\\.\\\\|[0-9]\\\\+% match\" /tmp/wm-dash.html | sort | uniq -c | sort -rn | head -12 && echo && echo \"=== card titles on dashboard \\(first 6\\) ===\" && grep -o '\"children\":\"[^\"]\\\\{15,90\\\\}\"' /tmp/wm-dash.html | grep -iE \"workshop|panel|fair|openings|session|night|club\" | head -6)",
+      "Bash(echo -n \"explore: opportunity count shown -> \" && grep -o \"[0-9]\\\\+ opportunities\" /tmp/wm-exp.html | head -2 && echo -n \"dashboard: count -> \" && grep -o \"[0-9]\\\\+ opportunities\" /tmp/wm-dash.html | head -2 && echo && echo \"=== filter chips present ===\" && grep -o \"Clubs\\\\|Professional\\\\|University\\\\|Research\\\\|Networking\\\\|Career fair\\\\|Info session\\\\|Competition\\\\|Volunteer\" /tmp/wm-exp.html | sort -u | tr '\\\\n' ' ' && echo && echo && echo \"=== profile prefilled ===\" && grep -o \"Data Science\\\\|4th year\\\\|Save changes\\\\|Your profile\\\\.\" /tmp/wm-prof.html | sort -u)",
+      "Bash(echo -n \"dashboard cards: \" && grep -o \"hover:border-foreground/20\" /tmp/wm-dash.html | wc -l && echo -n \"explore cards:   \" && grep -o \"hover:border-foreground/20\" /tmp/wm-exp.html | wc -l)",
+      "Bash(grep -A 15 \"Groq explanation failed\" /tmp/wm3.log | head -30)",
+      "Bash(curl -s -X POST http://localhost:3002/api/explain -H 'Content-Type: application/json' -H 'Cookie: __TRACKED_VAR__' -d @/tmp/wm-ids.json)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 -c \"import json,sys; print\\(len\\(json.load\\(sys.stdin\\).get\\('explanations',{}\\)\\), 'explanations still returned'\\)\")"
     ]
   }
 }
